@@ -10,6 +10,7 @@ public class Player extends DynamicGameObject{
     public static final float MAX_HEALTH = 100f;
 
     private float health = MAX_HEALTH;
+    private int score =0;
 
     public Player(Texture texture){
         super(texture, 0, 10f, SIZE, SIZE);
@@ -35,8 +36,11 @@ public class Player extends DynamicGameObject{
     public void takeDamage(float amount) { health -=amount;}
     public boolean isDead(){ return health<=0f;}
     public float getHealth(){ return health; }
+    public void addScore(int score){ this.score+=score;}
+    public int getScore(){return score;}
 
     public void reset(){
+        score = 0;
         health = MAX_HEALTH;
         bounds.x = Constants.SCREEN_WIDTH/2f - bounds.width /2f;
         bounds.y = 10f;

@@ -14,5 +14,6 @@ public class Seed extends FallingObject{
     @Override
     public void onHit(Player player){
         collectSound.play();
+        player.addScore(10);
     }
 }

@@ -158,6 +158,7 @@ public class ManfredaGameOOP extends ApplicationAdapter{
         for(Enemy enemy:enemies) enemy.render(batch);
         for(Seed seed:seeds) seed.render(batch);
         font.draw(batch, "HP:" + (int) player.getHealth(), 20, Constants.SCREEN_HEIGHT-20);
+        font.draw(batch, "Score: " + player.getScore(), Constants.SCREEN_WIDTH - 150, Constants.SCREEN_HEIGHT - 20);
         batch.end();
 
         drawHealthBar();
