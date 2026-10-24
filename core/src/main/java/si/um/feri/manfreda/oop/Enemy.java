@@ -9,16 +9,25 @@ public class Enemy extends FallingObject{
     private final Sound hitSound;
 
     public Enemy(Texture texture, Sound hitSound){
-        super(texture,
-            MathUtils.random(90f, 130f),
-            MathUtils.random(300f, 500f),
-            MathUtils.random(-240f, 240f));
+        super(texture);
         this.hitSound = hitSound;
+    }
+
+    // nakljucne lastnosti ob ponovni uporabi
+    public void init(){
+        init(MathUtils.random(90f, 130f),
+            MathUtils.random(300f,500f),
+            MathUtils.random(-240f, 240f));
     }
 
     @Override
     public void onHit(Player player){
         hitSound.play();
         player.takeDamage(DAMAGE);
+    }
+
+    @Override
+    public void reset(){
+        super.reset();
     }
 }

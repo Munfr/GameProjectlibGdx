@@ -13,8 +13,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.utils.Pool;
 
 public class ManfredaGameOOP extends ApplicationAdapter{
+    private int enemiesCreated = 0;
+    private int seedsCreated = 0;
     private static final float ENEMY_SPAWN_INTERVAL = 1.0f;
     private static final float SEED_SPAWN_INTERVAL = 1.7f;
 
@@ -30,6 +33,8 @@ public class ManfredaGameOOP extends ApplicationAdapter{
     private Player player;
     private Array<Enemy> enemies;
     private Array<Seed> seeds;
+    private Pool<Enemy> enemyPool;
+    private Pool<Seed> seedPool;
 
     private float enemySpawnTimer;
     private float seedSpawnTimer;
@@ -54,6 +59,24 @@ public class ManfredaGameOOP extends ApplicationAdapter{
         player = new Player(playerTexture);
         enemies = new Array<>();
         seeds = new Array<>();
+
+        enemyPool = new Pool<Enemy>() {
+            @Override
+            protected Enemy newObject() {
+                enemiesCreated++;
+                System.out.println("POOL new enemy created (all enemies created: "  + enemiesCreated + ")");
+                return new Enemy(enemyTexture, enemyHit);
+            }
+        };
+
+        seedPool = new Pool<Seed>() {
+            @Override
+            protected Seed newObject() {
+                seedsCreated++;
+                System.out.println("POOL new seed created (all seeds created: "  + seedsCreated + ")");
+                return new Seed(seedTexture, seedCollect);
+            }
+        };
     }
 
     @Override
@@ -62,6 +85,8 @@ public class ManfredaGameOOP extends ApplicationAdapter{
     }
 
     private void resetGame(){
+        enemyPool.freeAll(enemies);
+        seedPool.freeAll(seeds);
         enemies.clear();
         seeds.clear();
         enemySpawnTimer = 0f;
@@ -70,19 +95,20 @@ public class ManfredaGameOOP extends ApplicationAdapter{
     }
 
     private void spawnEnemy(){
-        enemies.add(new Enemy(enemyTexture, enemyHit));
+        Enemy enemy = enemyPool.obtain();
+        System.out.println("POOL: obtain Enemy, enemies free in pool: " + enemyPool.getFree() + " active: " + (enemies.size +1));
+        enemy.init();
+        enemies.add(enemy);
     }
 
     private void spawnSeed() {
-        Seed seed = new Seed(seedTexture, seedCollect);
+        Seed seed = seedPool.obtain();
+        seed.init();
 
         for (int attempt = 0; attempt < 10; attempt++) {
             boolean overlaps = false;
             for (Enemy enemy : enemies) {
-                if (seed.overlaps(enemy)) {
-                    overlaps = true;
-                    break;
-                }
+                if (seed.overlaps(enemy)) { overlaps = true; break; }
             }
             if (!overlaps) break;
             seed.setX(MathUtils.random(0f, Constants.SCREEN_WIDTH - seed.getBounds().width));
@@ -105,24 +131,28 @@ public class ManfredaGameOOP extends ApplicationAdapter{
             seedSpawnTimer = 0f;
         }
 
-        updateFalling(enemies, dt);
-        updateFalling(seeds, dt);
+        updateFalling(enemies, enemyPool, dt);
+        updateFalling(seeds, seedPool, dt);
 
         if(player.isDead()){
             resetGame();
         }
     }
 
-    private <T extends FallingObject> void updateFalling(Array<T> objects, float dt){
-        for(int i=objects.size-1; i>=0; i--){
+    private <T extends FallingObject> void updateFalling(Array<T> objects, Pool<T> pool, float dt){
+        for (int i = objects.size - 1; i >= 0; i--) {
             T obj = objects.get(i);
             obj.update(dt);
 
-            if(obj.overlaps(player)){
+            if (obj.overlaps(player)) {
                 obj.onHit(player);
                 objects.removeIndex(i);
-            }else if(obj.isOutOfScreen()){
+                pool.free(obj);
+                System.out.println("POOL: free " + obj.getClass().getSimpleName() + ", free in pool: " + pool.getFree());
+            } else if (obj.isOutOfScreen()) {
                 objects.removeIndex(i);
+                pool.free(obj);
+                System.out.println("POOL: free " + obj.getClass().getSimpleName() + ", free in pool: " + pool.getFree());
             }
         }
     }
