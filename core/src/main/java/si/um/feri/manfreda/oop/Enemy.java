@@ -15,9 +15,9 @@ public class Enemy extends FallingObject{
 
     // nakljucne lastnosti ob ponovni uporabi
     public void init(){
-        init(MathUtils.random(90f, 130f),
-            MathUtils.random(300f,500f),
-            MathUtils.random(-240f, 240f));
+        init(MathUtils.random(50f, 100f), // size
+            MathUtils.random(300f,500f), // spd
+            MathUtils.random(-240f, 240f)); // rotation spd
     }
 
     @Override

@@ -12,7 +12,7 @@ public class Seed extends FallingObject{
     }
 
     public void init(){
-        init(70f, 300f, 90f);
+        init(50f, 300f, 90f);
     }
 
     @Override

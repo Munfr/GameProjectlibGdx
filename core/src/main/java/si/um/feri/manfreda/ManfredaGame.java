@@ -31,6 +31,7 @@ public class ManfredaGame extends ApplicationAdapter {
     private Texture background;
     private BitmapFont font;
     private ShapeRenderer healthBar;
+    private int score = 0;
     private Sound seedCollect;
     private Sound enemyHit;
 
@@ -56,6 +57,7 @@ public class ManfredaGame extends ApplicationAdapter {
 
         boolean overlaps;
         int safetyCounter = 0; // safety if an overlaping random number is selected more then 10 times in a row
+        // dowhile tries to get better position for overlaping seed
         do{
             overlaps = false;
             seed.x = MathUtils.random(0f,SCREEN_WIDTH-seed.width);
@@ -87,6 +89,7 @@ public class ManfredaGame extends ApplicationAdapter {
         enemies.clear();
         seeds.clear();
 
+        score =0;
         enemySpawnTimer = 0;
         playerHealth = 100f;
 
@@ -207,6 +210,7 @@ public class ManfredaGame extends ApplicationAdapter {
             seed.y -= SEED_SPD*deltaTime;
 
             if(seed.overlaps(player)){
+                score+=10;
                 seedCollect.play();
                 seeds.removeIndex(i);
                 continue;
@@ -228,6 +232,7 @@ public class ManfredaGame extends ApplicationAdapter {
             batch.draw(seedImg, seed.x, seed.y, seed.width, seed.height);
         }
         font.draw(batch, "HP:"+ (int)playerHealth,20,SCREEN_HEIGHT-20);
+        font.draw(batch, "Score: " + score, SCREEN_WIDTH - 150, SCREEN_HEIGHT - 20);
 
         batch.end();
         drawHealthBar();
